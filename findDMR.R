@@ -33,61 +33,67 @@ temp <- data.frame(cg= paste('cg',1:4,sep=''), chr= c(rep(1,2), rep(2,2)), posit
 
 DMRfind <- function(dat, k) {
 
-k <- 1000
-count <- 1
-out <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA)
-clean <- TRUE
-chr.curr <- 1
+  #k <- 1000
+  count <- 1
+  out <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA)
+  clean <- TRUE
+  chr.curr <- 1
 
-for (i in 1:dim(temp)[1]) {
-  #initialize a new region here
+  # sort temp
+  temp <- dat[,c('cg','chr','position','statistic')]
+  temp <- temp[order(temp$chr, temp$position),]
 
-  # start a new DMR
-  if (clean) {
-    new <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA)    
-    cpgs <- 1
-    new$region <- count
-    new$chr <- temp[i,'chr']
-    new$start <- temp[i,'position']
-    new$stop <- temp[i,'position']
-    new$length <- new$stop - new$start
-    new$num_cpg <- 1
-    point <- temp[i,'position']
-  }
+  for (i in 1:dim(temp)[1]) {
+    #initialize a new region here
 
-  # end if last CpG
-  if (i==dim(temp)[1]) {
-    out <- rbind(out, new)
-    out <- out[-1,]
-    break
-  }
+    # start a new DMR
+    if (clean) {
+      new <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA)    
+      cpgs <- 1
+      new$region <- count
+      new$chr <- temp[i,'chr']
+      new$start <- temp[i,'position']
+      new$stop <- temp[i,'position']
+      new$length <- new$stop - new$start
+      new$num_cpg <- 1
+      point <- temp[i,'position']
+    }
 
-  # end if next CpG on a new chr
-  if (temp[i+1,'chr'] != chr.curr) {
-    out <- rbind(out, new)    
-    clean <- TRUE
-    count <- count + 1
-    chr.curr <- temp[i+1,'chr']
-    next
-  }
+    # end if last CpG
+    if (i==dim(temp)[1]) {
+      out <- rbind(out, new)
+      out <- out[-1,]
+      break
+    }
 
-  # if within k then add to current DMR; if not then write record to out
-  if (point+k >= temp[i+1,'position']) {
-    new$stop <- temp[i+1,'position']
-    new$length <- new$stop - new$start
-    new$num_cpg <- new$num_cpg + 1
-    point <- new$stop
-    clean <- FALSE
+    # end if next CpG on a new chr
+    if (temp[i+1,'chr'] != chr.curr) {
+      out <- rbind(out, new)    
+      clean <- TRUE
+      count <- count + 1
+      chr.curr <- temp[i+1,'chr']
+      next
+    }
+
+    # if within k then add to current DMR; if not then write record to out
+    if (point+k >= temp[i+1,'position']) {
+      new$stop <- temp[i+1,'position']
+      new$length <- new$stop - new$start
+      new$num_cpg <- new$num_cpg + 1
+      point <- new$stop
+      clean <- FALSE
   
-  } else {
-    out <- rbind(out, new)    
-    clean <- TRUE
-    count <- count + 1
+    } else {
+      out <- rbind(out, new)    
+      clean <- TRUE
+      count <- count + 1
+    }
   }
+
+  return(out)
 }
 
-out
-
+DMRfind(temp, 1000)
 
 
 
