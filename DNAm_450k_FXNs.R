@@ -215,6 +215,52 @@ filterCrossReactiveProbes <- function(gset) {
 # ------------------------------------------------------------------------
 
 
+# ------------------------------------------------------------------------
+# Verify Sample IDs-------------------------------------------------------
+# ------------------------------------------------------------------------
+
+# This function is tailored to how PREG IDs work. Can be made more general if desired.
+# Pass in an RGset containing a pData column called "Sample_Name", which should be the 
+# iid + visit number.
+# Function will return a histogram of all correlation values, a data.frame of correlations (duplicates removed),
+# a list of samples that have the same ID number but low correlation (lowMatch), and a list of samples that
+# have nonmatching IDs have higher than expected correlations (highMatch)
+
+snpCheckMySamples <- function(x){ 
+  
+  
+  RGset2 <- x
+  
+  mySnpBeta <- getSnpBeta(RGset2)
+  colnames(mySnpBeta) <- pData(RGset2)$Sample_Name   
+  
+  snp.cors <- cor(mySnpBeta)                         # make correlation matrix
+  snp.cors[upper.tri(snp.cors, diag = TRUE)] <- NA   # convert upper triangle of matrix to NA (i.e., the duplicate corrs)
+  cor.df <- as.data.frame.table(snp.cors, stringsAsFactors = FALSE)
+  names(cor.df) <- c("ID1", "ID2", "Corr")
+  cor.df <- subset(cor.df, !is.na(Corr))             # remove duplicates
+  
+  
+  # Create Histogram of Relatedness---------
+  hist(cor.df$Corr, breaks = "Scott", col = "dark grey", main = "Histogram of Distribution of Correlated SNP Beta Values for PREG")
+  
+  
+  # Change IDs to simple iids for comparison below
+  cor.df$ID1a <- substr(cor.df$ID1, 1, 4)
+  cor.df$ID2a <- substr(cor.df$ID2, 1, 4)
+  
+  # Identify samples that do not match closely enough
+  sameID <- cor.df[which(cor.df$ID1a == cor.df$ID2a),]
+  problem1 <- sameID[which(sameID$Corr < .90), ]
+  
+  
+  # Identify samples that match too closely
+  problem2 <- cor.df[which(cor.df$ID1a != cor.df$ID2a & cor.df$Corr > .6), ]
+  
+  alist <- list(matrix = cor.df, lowMatch = problem1, highMatch = problem2)
+  
+  return(alist)
+}
 
 
 
