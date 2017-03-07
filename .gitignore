@@ -2,4 +2,6 @@
 examples/*
 .DS_Store
 .dropbox
+.Rapp.history
+Icon
 
