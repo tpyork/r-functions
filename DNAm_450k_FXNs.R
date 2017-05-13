@@ -10,6 +10,7 @@
 # 2.  DMRfind.v1()  # original function
 # 3.  DMRauc()
 # 4.  filterCrossReactiveProbes()
+# 5.  snpCheckMySamples()
 
 
 # ------------------------------------------------------------------------
@@ -216,7 +217,7 @@ filterCrossReactiveProbes <- function(gset) {
 
 
 # ------------------------------------------------------------------------
-# Verify Sample IDs-------------------------------------------------------
+# snpCheckMySamples-------------------------------------------------------
 # ------------------------------------------------------------------------
 
 # This function is tailored to how PREG IDs work. Can be made more general if desired.
@@ -245,10 +246,14 @@ snpCheckMySamples <- function(x){
   hist(cor.df$Corr, breaks = "Scott", col = "dark grey", main = "Histogram of Distribution of Correlated SNP Beta Values for PREG")
   
   
-  # Change IDs to simple iids for comparison below
+  # PREG: Change IDs to simple iids for comparison below
   cor.df$ID1a <- substr(cor.df$ID1, 1, 4)
   cor.df$ID2a <- substr(cor.df$ID2, 1, 4)
-  
+
+  # mdd-rrn: Change IDs to simple iids for comparison below
+  cor.df$ID1a <- substr(cor.df$ID1, 1, nchar(x)-2)
+  cor.df$ID2a <- substr(cor.df$ID2, 1, nchar(x)-2)
+
   # Identify samples that do not match closely enough
   sameID <- cor.df[which(cor.df$ID1a == cor.df$ID2a),]
   problem1 <- sameID[which(sameID$Corr < .90), ]
