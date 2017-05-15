@@ -246,7 +246,7 @@ snpCheckMySamples <- function(RGset_object, twins = FALSE, repeated_measure = FA
   
   
   # Repeated samples and/or twins -----
-  if(twins == TRUE | repeated_measure == TRUE){
+  if (twins == TRUE | repeated_measure == TRUE) {
     
     
     if(length(fam_index) == 0){
@@ -330,8 +330,6 @@ snpCheckMySamples <- function(RGset_object, twins = FALSE, repeated_measure = FA
     
     return(alist)
   }
-  
-  
   
 }
 
