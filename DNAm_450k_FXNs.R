@@ -6,11 +6,100 @@
 # ------------------------------------------------------------------------
 # CONTENTS
 
-# 1.  DMRfind()
-# 2.  DMRfind.v1()  # original function
+# 0.  DMRfind.same()   # Has the restriction that coefs are in the same direction
+# 1.  DMRfind()        # No restriction on coef direction
+# 2.  DMRfind.v1()     # original function
 # 3.  DMRauc()
 # 4.  filterCrossReactiveProbes()
 # 5.  snpCheckMySamples()
+
+
+# ------------------------------------------------------------------------
+# DMRfindSame() ---------------------------------------------------------
+# ------------------------------------------------------------------------
+
+DMRfind.same <- function(dat, k) {
+  
+  # Find overlapping positions defined by k
+  # Has the restriction that coefs are in the same direction
+  # data must be ordered by chromosome then position; done within function
+  # columns are c('cg','chr','position','statistic','coef')
+  # chr is a single digit ('1', '2', 'X')
+  # suggest filter cg's by univariate statistic (p,q, 5/95 percentile)
+  # dat is data.frame; k is max distance between CpGs
+  
+  count <- 1
+  out <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA, pos_coef=NA, neg_coef=NA)
+  clean <- TRUE
+  chr.curr <- 1
+  
+  # sort temp
+  temp <- dat[,c('cg','chr','position','statistic','coef')]
+  #temp$chr <- as.numeric(temp$chr)
+  temp <- temp[order(temp$chr, temp$position),]
+  
+  
+  for (i in 1:dim(temp)[1]) {
+    #initialize a new region here
+    
+    # start a new DMR
+    if (clean) {
+      new <- data.frame(region=NA, chr=NA, start=NA, stop=NA, length=NA, num_cpg=NA, pos_coef=0, neg_coef=0)    
+      cpgs <- 1
+      new$region <- count
+      new$chr <- temp[i,'chr']
+      new$start <- temp[i,'position']
+      new$stop <- temp[i,'position']
+      new$length <- new$stop - new$start
+      new$num_cpg <- 1
+      new$pos_coef <- new$pos_coef + ifelse(temp[i,'coef'] >= 0, 1, 0)
+      new$neg_coef <- new$neg_coef + ifelse(temp[i,'coef'] < 0, 1, 0)  
+      point <- temp[i,'position']
+    }
+    
+    # end if last CpG
+    if (i==dim(temp)[1]) {
+      out <- rbind(out, new)
+      out <- out[-1,]
+      break
+    }
+    
+    # end if next CpG on a new chr
+    if (temp[i+1,'chr'] != chr.curr) {
+      out <- rbind(out, new)    
+      clean <- TRUE
+      count <- count + 1
+      chr.curr <- temp[i+1,'chr']
+      next
+    }
+    
+    
+    ifelse(is.na(temp[i,'coef']), 0, sign(temp[i,'coef']))
+    
+    
+    # if (within k & same coef direction) then add to current DMR; if not then write record to out
+    if ( (point+k >= temp[i+1,'position']) & 
+         (ifelse(is.na(temp[i,'coef']), 0, sign(temp[i,'coef']))==ifelse(is.na(temp[i+1,'coef']), 0, sign(temp[i+1,'coef'])) ) ) {
+      new$stop <- temp[i+1,'position']
+      new$length <- new$stop - new$start
+      new$num_cpg <- new$num_cpg + 1
+      new$pos_coef <- new$pos_coef + ifelse(temp[i+1,'coef'] >= 0, 1, 0)
+      new$neg_coef <- new$neg_coef + ifelse(temp[i+1,'coef'] < 0, 1, 0)  
+      point <- new$stop
+      clean <- FALSE
+      
+    } else {
+      out <- rbind(out, new)    
+      clean <- TRUE
+      count <- count + 1
+    }
+  }
+  
+  return(out)
+}
+# ------------------------------------------------------------------------
+
+
 
 
 # ------------------------------------------------------------------------
@@ -89,7 +178,6 @@ DMRfind <- function(dat, k) {
   return(out)
 }
 # ------------------------------------------------------------------------
-
 
 
 
