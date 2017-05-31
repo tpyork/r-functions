@@ -12,6 +12,9 @@
 # 3.  DMRauc()
 # 4.  filterCrossReactiveProbes()
 # 5.  snpCheckMySamples()
+# 6.  mad.matrix()     #calculate median absolute deviance from rows in a matrix
+
+
 
 
 # ------------------------------------------------------------------------
@@ -418,6 +421,22 @@ snpCheckMySamples <- function(RGset_object, twins = FALSE, repeated_measure = FA
     
     return(alist)
   }
+  
+}
+
+
+
+
+# ------------------------------------------------------------------------
+# mad.matrix() -----------------------------------------------------------
+# ------------------------------------------------------------------------
+
+mad.matrix <- function(meth,...) {
+  #calculate median absolute deviance from rows in a matrix
+  # meth= matrix of DNAm values; rows are probes; columns are subjects
+  
+  mad2 <- function(x) {median(abs(x - median(x)))}
+  apply(meth, 1, mad2)
   
 }
 
