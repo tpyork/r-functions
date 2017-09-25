@@ -6,13 +6,13 @@
 # ------------------------------------------------------------------------
 # CONTENTS
 
-# 0.  DMRfind.same()   # Has the restriction that coefs are in the same direction
-# 1.  DMRfind()        # No restriction on coef direction
-# 2.  DMRfind.v1()     # original function
-# 3.  DMRauc()
+# 0.  DMRfind.same()                       # Has the restriction that coefs are in the same direction
+# 1.  DMRfind()                            # No restriction on coef direction
+# 2.  DMRfind.v1()                         # original function
+# 3.  DMRauc()                             # estimate AUC using trapezoidal rulte
 # 4.  filterCrossReactiveProbes()
 # 5.  snpCheckMySamples()
-# 6.  mad.matrix()     #calculate median absolute deviance from rows in a matrix
+# 6.  mad.matrix()                         #calculate median absolute deviance from rows in a matrix
 
 
 
@@ -266,23 +266,27 @@ DMRfind.v1 <- function(dat, k) {
 # ------------------------------------------------------------------------
 
 DMRauc <- function(temp) {
-
-	# Calculate area of multiple trapezoids
-	# temp contains only cg's that make up a single DMR
-	# Columns of temp are: c('cg','chr','position','statistic')
-	# DMRs can be identified from a relaxed threshold of univariate tests
-
+  
+  # Calculate area of multiple trapezoids
+  # temp contains only cg's that make up a single DMR
+  # Columns of temp are: c('cg','chr','position','statistic')
+  # DMRs can be identified from a relaxed threshold of univariate tests
+  
   temp <- temp[order(temp$position),]
   auc.out <- 0
-
+  
   for (i in dim(temp)[1]:1) {
     h <- temp[i,'position'] - temp[i-1,'position']
     auc <- round(0.5*(temp[i,'statistic'] + temp[i-1,'statistic'])*h,4)
     auc.out <- auc.out + auc
     if (i==2) break
   }
-
-  return(auc.out)
+  
+  if (dim(temp)[1]==1) {
+    auc.out <- temp$statistic 
+  }
+  
+  return(round(auc.out, 4))
 }
 # ------------------------------------------------------------------------
 
