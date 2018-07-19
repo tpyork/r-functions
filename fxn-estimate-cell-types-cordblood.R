@@ -5,6 +5,7 @@
 
 library("genefilter")
 library("quadprog")
+library("FlowSorted.CordBlood.450k")
 
 
 estimateCellCounts.cord <- function (rgSet, compositeCellType = "CordBlood", processMethod = "auto", 
