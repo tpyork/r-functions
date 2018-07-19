@@ -1,0 +1,26 @@
+---
+title: "DNAm Power"
+author: "York"
+date: "2/13/2018"
+output: html_document
+---
+
+```{r setup, echo= FALSE}
+
+library(ssize.fdr)
+
+
+
+```
+
+
+```{r two.sample, echo= FALSE}
+
+ts <- ssize.twoSamp(delta= .05, sigma= .0614, fdr= 0.05, power= 0.8, pi0= c(.6, .7, .8, .9, .95, .99), maxN= 100, side= "two-sided",
+                    cex.legend= 0.5)
+
+
+
+```
+
+
