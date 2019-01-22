@@ -303,7 +303,7 @@ filterCrossReactiveProbes <- function(gset) {
   # crp <- read.table("/Users/timothyyork/Documents/Projects/methylation450k/crossReactiveProbes_450k/crossReactiveProbes_450k.txt", sep="\t", header=T)
   # save(crp, file="/Users/timothyyork/Dropbox/R_FXNs/support_files/crossReactiveProbes_450k.Rdata")
 
-  load("/Users/timothyyork/Dropbox/R_FXNs/support-files/crossReactiveProbes_450k.Rdata")
+  load("/Users/tpyork/Dropbox/R_FXNs/support-files/crossReactiveProbes_450k.Rdata")
 
   gset2 <- gset[!is.element(rownames(gset), crp$TargetID), ]
   gset2
